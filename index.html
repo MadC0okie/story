@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Тло для сторіз — плани</title>
+<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Ruslan+Display&family=Oswald:wght@500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:#EDE8DC;font-family:-apple-system,system-ui,sans-serif;padding:16px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.cv{flex:0 1 360px}
+canvas{width:100%;max-width:360px;height:auto;border-radius:12px;background:#1d1c1e;display:block;margin:0 auto}
+.p{flex:1 1 300px;max-width:420px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:12px}
+.r{display:flex;align-items:center;gap:10px}
+.l{font-size:14px;color:#a6a196;min-width:100px}
+select,input[type=text],textarea{flex:1;min-width:0;background:#1d1c1e;color:#EDE8DC;border:1px solid #3b3936;border-radius:8px;padding:8px;font-size:16px;font-family:inherit}
+input[type=range]{flex:1;accent-color:#F2A33A}
+input[type=checkbox]{accent-color:#F2A33A}
+button{background:transparent;color:#EDE8DC;border:1px solid #4a4743;border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit}
+button.y{background:#F2E21B;color:#161616;border:0;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}
+.ck{font-size:14px;color:#a6a196;display:flex;gap:14px;flex-wrap:wrap}
+#st{font-size:13px;color:#a6a196;line-height:1.6;margin:0}
+.hide{display:none!important}
+.v{min-width:44px;font-size:14px;text-align:right}
+.lnk{background:none;border:0;color:#a6a196;font-size:13px;text-decoration:underline;padding:0;align-self:flex-start}
+.box{border:1px solid #2f2d2b;border-radius:10px;padding:12px}
+</style>
+</head>
+<body>
+<div class="cv"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div class="p">
+<div class="box grp">
+<div class="r"><span class="l">Заголовок</span><input type="text" id="ttl" placeholder="напр. Найближчі плани"></div>
+<div class="r" style="align-items:flex-start"><span class="l" style="padding-top:8px">Пункти</span><textarea id="body" rows="5" placeholder="кожен рядок — окремий пункт. Можна лишити порожнім і дописати в Instagram"></textarea></div>
+<div class="r"><span class="l">Шрифт заголовка</span><select id="ft1"><option value="Ruslan Display">Ruslan Display</option><option value="Oswald">Oswald</option><option value="Amatic SC">Amatic SC</option></select></div>
+<div class="r"><span class="l">Шрифт пунктів</span><select id="ft2"><option value="Amatic SC">Amatic SC</option><option value="Caveat">Caveat</option><option value="Oswald">Oswald</option></select></div>
+</div>
+<div class="box grp">
+<div class="r"><span class="l">Фон</span><select id="bg"><option value="graphite">Графітова дошка</option><option value="night">Ніч</option><option value="warm">Тепла дошка</option></select></div>
+<div class="r"><span class="l">Декор</span><input type="range" id="deco" min="0" max="100" step="5" value="70"><span class="v" id="decoo">70%</span></div>
+<div class="ck"><label><input type="checkbox" id="oSun" checked> Сонце</label><label><input type="checkbox" id="oWav" checked> Хвилі</label><label><input type="checkbox" id="oBoat" checked> Кораблик</label><label><input type="checkbox" id="oGull" checked> Чайки</label><label><input type="checkbox" id="oWh" checked> Пшениця</label></div>
+<div class="ck"><label><input type="checkbox" id="oBrk" checked> Великі дужки [ ]</label><label><input type="checkbox" id="oDood" checked> Крейдяні дрібниці</label><label><input type="checkbox" id="boil" checked> Жива крейда</label></div>
+</div>
+<div class="r"><span class="l">Зерно</span><input type="range" id="k" min="0" max="100" step="1" value="35"><span class="v" id="ko">35%</span></div>
+<div class="r"><span class="l">Довжина відео</span><input type="range" id="rd" min="5" max="20" step="5" value="15"><span class="v" id="rdo">15 с</span></div>
+<div class="row"><button id="png">Зберегти картинку</button><button id="rec" class="y">Записати відео</button></div>
+<p id="st">1080×1920, анімація безшовно повторюється кожні 5 с. Під час запису не блокуй екран і не перемикай вкладку.</p>
+<div class="row"><button id="shb" class="y hide">Зберегти у Фото / поділитися</button><button id="dlb" class="hide">Завантажити файл</button></div>
+<video id="v" class="hide" controls playsinline loop style="width:180px;border-radius:8px"></video>
+<button id="reset" class="lnk">Скинути всі налаштування</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function R(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function mk(w,h){const k=document.createElement('canvas');k.width=w;k.height=h;return k}
+const c=$('c'),mx=c.getContext('2d'),W=1080,H=1920,TP=Math.PI*2,T=5;
+const lay=mk(W,H),x=lay.getContext('2d');
+const CH='#EDE8DC',YEL='#F2E21B',ORG='#F2A33A',RED='#D33A2C';
+const BGS={graphite:'#1d1c1e',night:'#131315',warm:'#211c19'};
+const rgba=(h,a)=>{const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
+const cl=p=>Math.max(0,Math.min(1,p));
+const FW={'Ruslan Display':400,'Oswald':500,'Amatic SC':700,'Caveat':600};
+const F=(f,s)=>`${FW[f]||400} ${s}px "${f}", sans-serif`;
+const HZ=360,SX=W*0.3,WL=150,BT=740,BB=1420,BL=95,BR=W-95,BA=64;
+
+const ttl=$('ttl'),body=$('body'),ft1=$('ft1'),ft2=$('ft2'),bgEl=$('bg'),decoEl=$('deco'),kEl=$('k'),rdEl=$('rd'),st=$('st');
+const oSun=$('oSun'),oWav=$('oWav'),oBoat=$('oBoat'),oGull=$('oGull'),oWh=$('oWh'),oBrk=$('oBrk'),oDood=$('oDood'),boil=$('boil');
+const bgc=()=>BGS[bgEl.value]||BGS.graphite;
+
+/* ---------- крейдяні лінії ---------- */
+function rough(pts,amp,seed){const rr=R(seed),o=[];for(let i=0;i<pts.length-1;i++){const [ax,ay]=pts[i],[bx,by]=pts[i+1],len=Math.hypot(bx-ax,by-ay)||1,n=Math.max(1,Math.ceil(len/28)),nx=-(by-ay)/len,ny=(bx-ax)/len;
+for(let j=0;j<n;j++){const q=j/n,d=(rr()-0.5)*amp;o.push([ax+(bx-ax)*q+nx*d,ay+(by-ay)*q+ny*d])}}o.push(pts[pts.length-1]);return o}
+function sp(g,pts){g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke()}
+function chalk(g,pts,w,col,seed,amp){amp=amp===undefined?5:amp;g.save();g.lineCap='round';g.lineJoin='round';g.strokeStyle=col;g.lineWidth=w;sp(g,rough(pts,amp,seed));g.globalAlpha*=0.45;g.lineWidth=w*0.55;sp(g,rough(pts,amp*1.3,seed+977));g.restore()}
+function ink(g,pts,w,col){g.save();g.lineCap='round';g.lineJoin='round';g.strokeStyle=col;g.lineWidth=w;sp(g,pts);g.restore()}
+
+/* ---------- дошка ---------- */
+const tex=mk(W,H),tx=tex.getContext('2d');
+function makeTex(){const r0=R(42);tx.globalCompositeOperation='source-over';tx.globalAlpha=1;tx.fillStyle=bgc();tx.fillRect(0,0,W,H);
+for(let i=0;i<10;i++){const px=r0()*W,py=r0()*H,rr=200+r0()*500,g=tx.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,`rgba(255,255,255,${0.012+r0()*0.018})`);g.addColorStop(1,'rgba(255,255,255,0)');tx.fillStyle=g;tx.fillRect(px-rr,py-rr,rr*2,rr*2)}
+for(let i=0;i<16000;i++){tx.fillStyle=r0()<0.55?`rgba(255,255,255,${r0()*0.045})`:`rgba(0,0,0,${r0()*0.22})`;const s=0.7+r0()*1.3;tx.fillRect(r0()*W,r0()*H,s,s)}
+tx.lineCap='round';
+for(let s=0;s<12;s++){const cx0=r0()*W,cy0=r0()*H,len=300+r0()*650,ang=(r0()-0.5)*0.5+(r0()<0.3?Math.PI/2:0),band=50+r0()*120,nl=22+Math.floor(r0()*30),a0=0.01+r0()*0.022;
+tx.save();tx.translate(cx0,cy0);tx.rotate(ang);for(let l=0;l<nl;l++){const off=(l/nl-0.5)*band+(r0()-0.5)*4,stx=(r0()-0.5)*90;tx.strokeStyle=`rgba(255,255,255,${a0*(0.4+r0())})`;tx.lineWidth=0.5+r0()*1.2;
+tx.beginPath();tx.moveTo(-len/2+stx,off);tx.quadraticCurveTo(0,off+(r0()-0.5)*18,len/2+stx,off+(r0()-0.5)*10);tx.stroke()}tx.restore()}
+for(let i=0;i<1500;i++){const px=r0()*W,py=r0()*H,a=r0()*Math.PI,l=6+r0()*70,lt=r0()<0.78;tx.strokeStyle=lt?`rgba(255,255,255,${0.02+r0()*0.06})`:`rgba(0,0,0,${0.12+r0()*0.2})`;tx.lineWidth=0.45+r0()*0.8;
+tx.beginPath();tx.moveTo(px,py);tx.quadraticCurveTo(px+Math.cos(a)*l/2+(r0()-0.5)*6,py+Math.sin(a)*l/2+(r0()-0.5)*6,px+Math.cos(a)*l,py+Math.sin(a)*l);tx.stroke()}
+const gw=tx.createRadialGradient(SX,HZ,0,SX,HZ,760);gw.addColorStop(0,rgba(YEL,0.09));gw.addColorStop(0.45,rgba(ORG,0.035));gw.addColorStop(1,rgba(ORG,0));tx.fillStyle=gw;tx.fillRect(0,0,W,H);
+const gb=tx.createLinearGradient(0,H-520,0,H);gb.addColorStop(0,rgba(ORG,0));gb.addColorStop(1,rgba(ORG,0.07));tx.fillStyle=gb;tx.fillRect(0,H-520,W,520);
+const vg=tx.createRadialGradient(W/2,H/2,H*0.22,W/2,H/2,H*0.78);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.55)');tx.fillStyle=vg;tx.fillRect(0,0,W,H)}
+
+/* ---------- море ---------- */
+const waveBand=(()=>{const bh=460,m=mk(W+WL,bh),g=m.getContext('2d');g.strokeStyle=ORG;g.lineWidth=2.2;g.lineCap='round';
+for(let y=10;y<bh;y+=19){g.beginPath();for(let px=0;px<=W+WL;px+=5){const yy=y+Math.sin(px/WL*TP)*7;px?g.lineTo(px,yy):g.moveTo(px,yy)}g.stroke()}
+g.globalCompositeOperation='destination-in';const gr=g.createLinearGradient(0,0,0,bh);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(0.5,'rgba(0,0,0,0.6)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,W+WL,bh);return m})();
+function sun(t){const r=135,p=0.5+0.5*Math.sin(TP*t/T);x.save();x.beginPath();x.rect(0,0,W,HZ);x.clip();
+const g=x.createRadialGradient(SX,HZ,r*0.8,SX,HZ,r*2.6);g.addColorStop(0,rgba(YEL,0.16+0.06*p));g.addColorStop(1,rgba(YEL,0));x.fillStyle=g;x.fillRect(SX-r*2.6,HZ-r*2.6,r*5.2,r*2.6);
+x.fillStyle=YEL;x.beginPath();x.arc(SX,HZ,r,Math.PI,TP);x.fill();
+x.globalCompositeOperation='destination-out';for(let k=0;k<4;k++){const yy=HZ-16-k*26,th=11-k*2.4;x.fillRect(SX-r*2.7,yy-th/2,r*5.4,th)}x.restore()}
+function reflect(t,sh){x.save();x.lineCap='round';x.strokeStyle=YEL;x.lineWidth=3.2;
+for(let k=0;k<14;k++){const yl=HZ+10+k*19,wk=150*(1-k/14)*(0.75+0.25*Math.sin(TP*t/T*2+k*0.9));if(wk<8)continue;const pts=[];for(let px=SX-wk;px<=SX+wk;px+=6)pts.push([px,yl+Math.sin((px+sh)/WL*TP)*7]);x.globalAlpha=0.9*(1-k/14);sp(x,pts)}x.restore()}
+function boat(t){const bx=W*0.76,by=HZ+4+Math.sin(TP*t/T*2)*4,rot=Math.sin(TP*t/T)*0.04,fl=Math.sin(TP*t/T*3)*5,g=x;
+g.save();g.translate(bx,by);g.rotate(rot);g.scale(0.62,0.62);g.lineJoin='round';g.lineCap='round';
+g.fillStyle=CH;g.beginPath();g.moveTo(8,-178);g.quadraticCurveTo(64,-104,96,-26);g.lineTo(8,-22);g.closePath();g.fill();
+g.fillStyle=rgba(CH,0.72);g.beginPath();g.moveTo(-8,-160);g.quadraticCurveTo(-44,-92,-80,-26);g.lineTo(-8,-24);g.closePath();g.fill();
+g.strokeStyle=CH;g.lineWidth=5;g.beginPath();g.moveTo(0,-8);g.lineTo(0,-196);g.stroke();
+g.fillStyle=RED;g.beginPath();g.moveTo(2,-196);g.quadraticCurveTo(20,-198+fl,40,-188+fl*0.6);g.quadraticCurveTo(20,-182+fl*0.4,2,-180);g.closePath();g.fill();
+g.fillStyle=bgc();g.strokeStyle=ORG;g.lineWidth=5;g.beginPath();g.moveTo(-108,-18);g.lineTo(112,-22);g.quadraticCurveTo(92,20,40,24);g.lineTo(-62,24);g.quadraticCurveTo(-96,14,-108,-18);g.closePath();g.fill();g.stroke();
+g.lineWidth=3;g.beginPath();g.moveTo(-90,-2);g.lineTo(96,-6);g.stroke();g.restore()}
+const GULLS=[[0.62,150,26,0],[0.72,205,18,1.7],[0.12,120,22,3.1]];
+function gulls(t,dn){x.save();x.strokeStyle=rgba(CH,0.4+0.45*dn);x.lineWidth=3.5;x.lineCap='round';x.lineJoin='round';
+GULLS.forEach(([fx,fy,s,ph])=>{const px=fx*W+Math.cos(TP*t/T+ph)*22,py=fy+Math.sin(TP*t/T+ph)*10,f=0.45+0.55*Math.abs(Math.sin(TP*t/T*3+ph));
+x.beginPath();x.moveTo(px-s,py-s*0.25*f);x.quadraticCurveTo(px-s*0.45,py-s*0.75*f,px,py);x.quadraticCurveTo(px+s*0.45,py-s*0.75*f,px+s,py-s*0.25*f);x.stroke()});x.restore()}
+
+/* ---------- пшениця ---------- */
+function ear(g,bx,by,ang,L,s,col){const n=Math.max(4,Math.round(L/(s*0.95))),dx=Math.sin(ang),dy=-Math.cos(ang);g.save();g.fillStyle=col;g.strokeStyle=col;g.lineCap='round';g.lineWidth=Math.max(1,s*0.09);
+for(let i=0;i<n;i++){const q=i/n,sd=i%2?1:-1,sz=s*(1-q*0.35);g.save();g.translate(bx+dx*L*q,by+dy*L*q);g.rotate(ang+sd*0.55);
+g.beginPath();g.ellipse(0,-sz*0.55,sz*0.34,sz*0.6,0,0,TP);g.fill();g.beginPath();g.moveTo(0,-sz*1.1);g.lineTo(sd*sz*0.2,-sz*1.1-s*1.5);g.stroke();g.restore()}
+g.save();g.translate(bx+dx*L,by+dy*L);g.rotate(ang);g.beginPath();g.ellipse(0,-s*0.35,s*0.28,s*0.5,0,0,TP);g.fill();g.beginPath();g.moveTo(0,-s*0.8);g.lineTo(0,-s*2.4);g.stroke();g.restore();g.restore()}
+function stalk(g,x0,y0,h,lean,s,col,lw){const tx2=x0+lean*h,ty=y0-h,qx=x0+lean*h*0.2,qy=y0-h*0.55,pts=[];
+for(let i=0;i<=14;i++){const q=i/14,a=1-q;pts.push([a*a*x0+2*a*q*qx+q*q*tx2,a*a*y0+2*a*q*qy+q*q*ty])}
+ink(g,pts,lw,col);ear(g,tx2,ty,Math.atan2(tx2-qx,qy-ty),s*7,s,col)}
+const WHEAT=(()=>{const r=R(77),a=[];for(let i=0;i<64;i++){const back=i<38;a.push({x:-30+r()*(W+60),h:back?100+r()*80:140+r()*100,lean:(r()-0.5)*0.22,s:back?9+r()*3:12+r()*4,ph:r()*TP,back})}return a.sort((p,q)=>q.back-p.back)})();
+function wheat(t,dn){for(const w of WHEAT){const sw=Math.sin(TP*t/T+w.ph)*0.05;stalk(x,w.x,H+10,w.h,w.lean+sw,w.s,w.back?rgba(ORG,0.35+0.3*dn):rgba(YEL,0.55+0.45*dn),w.back?2.4:3.4)}}
+
+/* ---------- крейдяні дрібниці і дужки ---------- */
+function doodles(BS,dn){x.save();x.globalAlpha=0.55+0.4*dn;const bx=120,by=1490;
+for(let j=0;j<4;j++)chalk(x,[[bx+j*22+3,by-34],[bx+j*22,by+34]],4,CH,800+j+BS*7,2);chalk(x,[[bx-12,by+24],[bx+3*22+12,by-24]],4,RED,810+BS*7,2);
+const hx=W-150,hy=1488,pts=[];for(let i=0;i<=40;i++){const a=TP*i/40,px=16*Math.pow(Math.sin(a),3),py=-(13*Math.cos(a)-5*Math.cos(2*a)-2*Math.cos(3*a)-Math.cos(4*a));pts.push([hx+px*2.3,hy+py*2.3])}
+chalk(x,pts,5,RED,820+BS*7,1.5);x.restore()}
+function brackets(BS){chalk(x,[[BL+BA,BT],[BL,BT],[BL,BB],[BL+BA,BB]],8,CH,900+BS*7,3);chalk(x,[[BR-BA,BT],[BR,BT],[BR,BB],[BR-BA,BB]],8,CH,950+BS*7,3)}
+
+/* ---------- текст ---------- */
+let L=null;
+function layout(){const tt=ttl.value.trim(),ls=body.value.split('\n').map(s=>s.trim()).filter(Boolean),f1=ft1.value,f2=ft2.value,maxW=700,maxH=600,multi=ls.length>1,bw=multi?64:0;
+let ts=tt?110:0;if(tt){x.font=F(f1,ts);const w=x.measureText(tt).width;if(w>maxW)ts*=maxW/w}
+let fs=90,rows=[];
+for(;fs>=34;fs-=4){x.font=F(f2,fs);rows=[];let ok=true;
+for(const ln of ls){let cur='',first=true;for(const w of ln.split(/\s+/)){const tr=cur?cur+' '+w:w;if(x.measureText(tr).width<=maxW-bw)cur=tr;else{if(cur){rows.push({s:cur,b:first});first=false}cur=w;if(x.measureText(w).width>maxW-bw)ok=false}}if(cur)rows.push({s:cur,b:first})}
+if(ok&&(tt?ts*1.15+60:0)+rows.length*fs*1.15<=maxH)break}
+const hTot=(tt?ts*1.15+(rows.length?60:0):0)+rows.length*fs*1.15;L={tt,ts,f1,f2,fs,rows,bw,multi,y0:(BT+BB)/2-hTot/2}}
+function drawText(){if(!L)layout();const {tt,ts,f1,f2,fs,rows,bw,multi}=L;let y=L.y0;x.textBaseline='middle';
+if(tt){x.font=F(f1,ts);x.textAlign='center';x.fillStyle=YEL;x.fillText(tt,W/2,y+ts*0.55);const w=x.measureText(tt).width;y+=ts*1.15;chalk(x,[[W/2-w/2,y+8],[W/2+w/2,y-2]],7,RED,601,4);y+=60}
+if(!rows.length)return;x.font=F(f2,fs);let mw=0;rows.forEach(r=>mw=Math.max(mw,x.measureText(r.s).width));const left=W/2-(mw+bw)/2;x.fillStyle=CH;
+rows.forEach((r,i)=>{const yy=y+fs*0.575+i*fs*1.15;if(multi){x.textAlign='left';if(r.b)chalk(x,[[left+4,yy+2],[left+40,yy-4]],6,ORG,700+i,2);x.fillText(r.s,left+bw,yy)}else{x.textAlign='center';x.fillText(r.s,W/2,yy)}})}
+
+/* ---------- фактура і зерно ---------- */
+const cmask=(()=>{const m=mk(W,H),g=m.getContext('2d'),r=R(500);for(let i=0;i<60000;i++){g.fillStyle=`rgba(0,0,0,${0.25+r()*0.75})`;const s=1+r()*2.4;g.fillRect(r()*W,r()*H,s,s)}
+g.lineCap='round';for(let i=0;i<4000;i++){g.strokeStyle=`rgba(0,0,0,${0.3+r()*0.5})`;g.lineWidth=1+r()*1.4;const px=r()*W,py=r()*H,a=-0.9+r()*0.4,l=6+r()*16;g.beginPath();g.moveTo(px,py);g.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);g.stroke()}return m})();
+const noise=[];for(let n=0;n<6;n++){const k=mk(360,640),kx=k.getContext('2d'),d=kx.createImageData(360,640),rn=R(100+n);for(let i=0;i<d.data.length;i+=4){const v=128+(rn()-0.5)*190;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}kx.putImageData(d,0,0);noise.push(k)}
+function film(k,rf){if(k<=0)return;mx.globalCompositeOperation='overlay';mx.globalAlpha=0.4*k;mx.drawImage(noise[Math.floor(rf()*6)],0,0,W,H);mx.globalCompositeOperation='source-over';mx.globalAlpha=1;
+const nd=Math.floor(rf()*4*k);for(let j=0;j<nd;j++){mx.fillStyle=rf()<0.5?rgba(CH,0.4):'rgba(0,0,0,0.55)';mx.beginPath();mx.ellipse(rf()*W,rf()*H,1.5+rf()*3.5,1.5+rf()*3,rf()*3,0,TP);mx.fill()}}
+
+/* ---------- кадр ---------- */
+function draw(t,now){const k=kEl.value/100,dn=decoEl.value/100,rf=R(Math.floor(now/41.67)*13+7),BS=boil.checked?Math.floor(t*4):0,sh=((t/T)*2*WL)%WL;
+mx.globalCompositeOperation='source-over';mx.globalAlpha=1;mx.drawImage(tex,0,0);
+x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;x.clearRect(0,0,W,H);
+if(dn>0){x.save();x.globalAlpha=0.35+0.65*dn;
+if(oSun.checked)sun(t);
+if(oWav.checked){x.save();x.globalAlpha*=0.35+0.6*dn;x.drawImage(waveBand,-sh,HZ);x.restore();if(oSun.checked)reflect(t,sh)}
+if(oSun.checked||oWav.checked)chalk(x,[[40,HZ],[W-40,HZ]],3,rgba(CH,0.55),11+BS*7,2);
+if(oBoat.checked)boat(t);x.restore();
+if(oGull.checked)gulls(t,dn);
+if(oWh.checked)wheat(t,dn);
+if(oDood.checked)doodles(BS,dn)}
+if(oBrk.checked)brackets(BS);
+drawText();
+x.globalCompositeOperation='destination-out';x.globalAlpha=0.55;x.drawImage(cmask,0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;
+mx.drawImage(lay,0,0);film(k,rf)}
+let start=performance.now(),recording=false,lastUrl=null,lastBlob=null,lastName='';
+function frame(now){const el=(now-start)/1000;draw(el%T,now);requestAnimationFrame(frame)}
+
+/* ---------- налаштування ---------- */
+const SAVE_IDS=['ttl','body','ft1','ft2','bg','deco','oSun','oWav','oBoat','oGull','oWh','oBrk','oDood','boil','k','rd'];const KEY='plany_tlo_v1';
+function saveSettings(){try{const o={};SAVE_IDS.forEach(id=>{const e=$(id);o[id]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+function loadSettings(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(!o)return;SAVE_IDS.forEach(id=>{if(!(id in o))return;const e=$(id);if(e.type==='checkbox')e.checked=o[id];else e.value=o[id]})}catch(e){}}
+function upd(){$('decoo').textContent=decoEl.value+'%';$('ko').textContent=kEl.value+'%';$('rdo').textContent=rdEl.value+' с'}
+SAVE_IDS.forEach(id=>$(id).addEventListener('input',()=>{upd();saveSettings();L=null;if(id==='bg')makeTex()}));
+$('reset').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+
+/* ---------- збереження ---------- */
+const v=$('v'),dlb=$('dlb'),shb=$('shb');
+function offer(blob,name){if(lastUrl)URL.revokeObjectURL(lastUrl);lastBlob=blob;lastName=name;lastUrl=URL.createObjectURL(blob);dlb.classList.remove('hide');
+const f=new File([blob],name,{type:blob.type});if(navigator.canShare&&navigator.canShare({files:[f]}))shb.classList.remove('hide');else shb.classList.add('hide')}
+dlb.onclick=()=>{if(!lastUrl)return;const a=document.createElement('a');a.href=lastUrl;a.download=lastName;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000)};
+shb.onclick=async()=>{if(!lastBlob)return;try{await navigator.share({files:[new File([lastBlob],lastName,{type:lastBlob.type})]})}catch(e){if(e.name!=='AbortError')st.textContent='Меню «Поділитися» не відкрилось. Спробуй «Завантажити файл».'}};
+$('png').onclick=()=>{c.toBlob(b=>{if(!b)return;offer(b,'plany_tlo.png');v.classList.add('hide');st.textContent='Картинку готово. На iPhone натисни «Зберегти у Фото / поділитися».'},'image/png')};
+$('rec').onclick=()=>{if(recording)return;if(!window.MediaRecorder||!c.captureStream){st.textContent='Цей браузер не вміє записувати відео. Онови iOS або спробуй Chrome.';return}
+const D=+rdEl.value,stream=c.captureStream(30),types=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'],mime=types.find(m=>MediaRecorder.isTypeSupported(m))||'',ext=mime.includes('mp4')||!mime?'mp4':'webm';let rec;
+try{rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:10000000}:{})}catch(e){st.textContent='Не вдалося почати запис.';return}
+const ch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+rec.onstop=()=>{recording=false;const b=new Blob(ch,{type:mime||'video/mp4'});offer(b,'plany_tlo_'+D+'s_9x16.'+ext);v.src=lastUrl;v.classList.remove('hide');
+st.textContent='Готово ('+ext.toUpperCase()+', '+(b.size/1048576).toFixed(1)+' МБ). На iPhone натисни «Зберегти у Фото / поділитися» → «Зберегти відео».'};
+dlb.classList.add('hide');shb.classList.add('hide');recording=true;st.textContent='Записую… '+D+' с, не блокуй екран.';start=performance.now();rec.start(100);setTimeout(()=>rec.stop(),D*1000+150)};
+
+/* ---------- старт ---------- */
+loadSettings();upd();makeTex();
+Promise.all([['Ruslan Display',400],['Oswald',500],['Amatic SC',700],['Caveat',600]].map(([f,w])=>document.fonts.load(`${w} 100px "${f}"`))).catch(()=>{}).finally(()=>{L=null;start=performance.now();requestAnimationFrame(frame)});
+</script>
+</body>
+</html>
